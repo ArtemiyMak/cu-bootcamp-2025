@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup
 from dotenv import load_dotenv
 import requests
 
@@ -57,7 +57,7 @@ def report_gen(params, answers):
         'modelUri': f'gpt://{folder_id}/{gpt_model}',
         'completionOptions': {'stream': False, 'temperature': 1, 'maxTokens': 5000},
         'messages': [
-            {'role': 'system', 'text': system_prompt},  # Системный промпт
+            {'role': 'system', 'text': system_prompt},
             {'role': 'user', 'text': user_prompt},
         ],
     }
@@ -82,7 +82,7 @@ def report_gen(params, answers):
 
 
 @dp.message(Command("start"))
-async def start(message: Message, state: FSMContext) -> None:
+async def start(message: Message) -> None:
     kb = [
         [KeyboardButton(text="Написать отчет")],
         [KeyboardButton(text="Поблагодарить разработчика")]
@@ -104,7 +104,6 @@ async def ask_next_parameter(message: Message, state: FSMContext) -> None:
         await finish_report(message, state)
 
 
-# Обработка ответов
 @dp.message(ReportInfo.waiting_for_date)
 async def process_date(message: Message, state: FSMContext) -> None:
     await state.update_data(date=message.text)
