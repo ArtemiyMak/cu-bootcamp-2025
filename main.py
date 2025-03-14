@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.types import Message
+from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from dotenv import load_dotenv
 import requests
 
@@ -81,15 +81,39 @@ parameters = [
 
 @dp.message(Command("start"))
 async def start(message: Message, state: FSMContext) -> None:
+    kb = [
+        [KeyboardButton(text="Написать отчет")],
+        [KeyboardButton(text="Поблагодарить разработчика")]
+    ]
+    keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+    await message.reply("Выберите действие:", reply_markup=keyboard)
+
+
+@dp.message(lambda message: message.text == "Написать отчет")
+async def start_report(message: Message, state: FSMContext) -> None:
+
     parameters_list = "\n".join(parameters)
-    await message.reply(f"Заполни параметры для отчета. Вот параметры, которые могут быть в него включены:\n{parameters_list}\n\nОтправь ответ в виде: 1) ответ1 2) ответ2 ...")
+
+    await message.reply(f"Заполни параметры для отчета. Вот параметры, которые могут быть в него включены:\n{parameters_list}\n\nОтправь ответ в виде: 1) ответ1 2) ответ2 ...", reply_markup=ReplyKeyboardRemove())
     await state.set_state(ReportInfo.waiting_for_answers)
+
+
+@dp.message(lambda message: message.text == "Поблагодарить разработчика")
+async def thank_developer(message: Message) -> None:
+    await message.reply("Спасибо!")
 
 
 @dp.message(ReportInfo.waiting_for_answers)
 async def process_answer(message: Message, state: FSMContext) -> None:
     user_answers = message.text
     await message.reply(report_gen(parameters, user_answers))
+    await state.clear()
+    kb = [
+        [KeyboardButton(text="Написать отчет")],
+        [KeyboardButton(text="Поблагодарить разработчика")]
+    ]
+    keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+    await message.reply("Выберите действие:", reply_markup=keyboard)
 
 async def main():
     await dp.start_polling(bot)
