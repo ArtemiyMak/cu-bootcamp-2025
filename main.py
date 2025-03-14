@@ -24,12 +24,16 @@ def report_gen(parameters, answers):
     folder_id = os.getenv("YANDEX_FOLDER_ID")
     api_key = os.getenv("YANDEX_API_KEY")
     gpt_model = 'yandexgpt-lite'
-    user_prompt = "Придумай цельный отчет. Без дополнительного оформления, цельным текстом. Далее будут даны параметры и ответы на них, напиши связный цельный текст, описывающий прошедший урок, будь креативным, развернуто используй данные параметры и ответы для создания человекоподобного текста. : " + "\n".join(parameters) + ". Ответы: " + "\n".join(answers)
-
+    system_prompt = "Придумай цельный отчет. Без дополнительного оформления, цельным текстом. Далее будут даны параметры и ответы на них, напиши связный цельный текст, описывающий прошедший урок, будь креативным, развернуто используй данные параметры и ответы для создания человекоподобного текста."
+    user_prompt = (
+            "Параметры для отчета:\n" + "\n".join(parameters) + "\n\n"
+                                                                "Ответы:\n" + "\n".join(answers)
+    )
     body = {
         'modelUri': f'gpt://{folder_id}/{gpt_model}',
         'completionOptions': {'stream': False, 'temperature': 1, 'maxTokens': 5000},
         'messages': [
+            {'role': 'system', 'text': system_prompt},  # Системный промпт
             {'role': 'user', 'text': user_prompt},
         ],
     }
