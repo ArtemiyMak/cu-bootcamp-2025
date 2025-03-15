@@ -66,15 +66,15 @@ def report_gen(params, answers, language):
         "Create a comprehensive report. Without additional formatting, as a continuous text. Below will be given parameters and answers to them, "
         "write a coherent and comprehensive text describing the past lesson in detail. Be creative and use the provided parameters and answers extensively. "
         "Include specific examples, elaborate on key points, and provide a thorough analysis of the lesson. Ensure the text is engaging, informative, and human-like, "
-        "with a natural flow and a length that is approximately 1.5 to 2 times longer than usual." if language == "en" else
+        "with a natural flow and a length that is approximately 1.5 to 2 times longer than usual. USE ONLY ENGLISH LANGUAGE STRICTLY" if language == "en" else
         "Crea un rapporto completo. Senza formattazione aggiuntiva, come testo continuo. Di seguito verranno forniti parametri e risposte, "
         "scrivi un testo coerente e completo che descriva la lezione passata in dettaglio. Sii creativo e utilizza i parametri e le risposte fornite in modo esteso. "
         "Includi esempi specifici, approfondisci i punti chiave e fornisci un'analisi approfondita della lezione. Assicurati che il testo sia coinvolgente, informativo e simile a quello umano, "
-        "con un flusso naturale e una lunghezza approssimativamente 1,5-2 volte maggiore del solito." if language == "it" else
+        "con un flusso naturale e una lunghezza approssimativamente 1,5-2 volte maggiore del solito. UTILIZZARE ESCLUSIVAMENTE LA LINGUA ITALIANA " if language == "it" else
         "Erstelle einen umfassenden Bericht. Ohne zusätzliche Formatierung, als fortlaufender Text. Es werden Parameter und Antworten darauf gegeben, "
         "schreibe einen zusammenhängenden und umfassenden Text, der die vergangene Stunde detailliert beschreibt. Sei kreativ und verwende die bereitgestellten Parameter und Antworten ausführlich. "
         "Füge spezifische Beispiele hinzu, gehe auf Schlüsselpunkte ein und liefere eine gründliche Analyse der Stunde. Achte darauf, dass der Text ansprechend, informativ und menschenähnlich ist, "
-        "mit einem natürlichen Fluss und einer Länge, die etwa 1,5- bis 2-mal länger ist als üblich."
+        "mit einem natürlichen Fluss und einer Länge, die etwa 1,5- bis 2-mal länger ist als üblich. VERWENDEN SIE AUSSCHLIESSLICH DIE DEUTSCHE SPRACHE"
     )
 
     user_prompt = (
