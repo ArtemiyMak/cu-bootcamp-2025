@@ -58,13 +58,32 @@ def report_gen(params, answers, language):
     folder_id = os.getenv("YANDEX_FOLDER_ID")
     api_key = os.getenv("YANDEX_API_KEY")
     gpt_model = 'yandexgpt-lite'
+
     system_prompt = (
         "Придумай цельный отчет. Без дополнительного оформления, цельным текстом. Далее будут даны параметры и ответы на них, "
         "напиши связный цельный текст, описывающий прошедший урок, будь креативным, развернуто используй данные параметры и ответы "
-        "для создания человекоподобного текста."
+        "для создания человекоподобного текста." if language == "ru" else
+        "Create a comprehensive report. Without additional formatting, as a continuous text. Below will be given parameters and answers to them, "
+        "write a coherent and comprehensive text describing the past lesson in detail. Be creative and use the provided parameters and answers extensively. "
+        "Include specific examples, elaborate on key points, and provide a thorough analysis of the lesson. Ensure the text is engaging, informative, and human-like, "
+        "with a natural flow and a length that is approximately 1.5 to 2 times longer than usual." if language == "en" else
+        "Crea un rapporto completo. Senza formattazione aggiuntiva, come testo continuo. Di seguito verranno forniti parametri e risposte, "
+        "scrivi un testo coerente e completo che descriva la lezione passata in dettaglio. Sii creativo e utilizza i parametri e le risposte fornite in modo esteso. "
+        "Includi esempi specifici, approfondisci i punti chiave e fornisci un'analisi approfondita della lezione. Assicurati che il testo sia coinvolgente, informativo e simile a quello umano, "
+        "con un flusso naturale e una lunghezza approssimativamente 1,5-2 volte maggiore del solito." if language == "it" else
+        "Erstelle einen umfassenden Bericht. Ohne zusätzliche Formatierung, als fortlaufender Text. Es werden Parameter und Antworten darauf gegeben, "
+        "schreibe einen zusammenhängenden und umfassenden Text, der die vergangene Stunde detailliert beschreibt. Sei kreativ und verwende die bereitgestellten Parameter und Antworten ausführlich. "
+        "Füge spezifische Beispiele hinzu, gehe auf Schlüsselpunkte ein und liefere eine gründliche Analyse der Stunde. Achte darauf, dass der Text ansprechend, informativ und menschenähnlich ist, "
+        "mit einem natürlichen Fluss und einer Länge, die etwa 1,5- bis 2-mal länger ist als üblich."
     )
+
     user_prompt = (
-        "Параметры для отчета:\n" + "\n".join(params) + "\n\nОтветы:\n" + "\n".join(answers))
+        "Параметры для отчета:\n" + "\n".join(params) + "\n\nОтветы:\n" + "\n".join(answers) if language == "ru" else
+        "Parameters for the report:\n" + "\n".join(params) + "\n\nAnswers:\n" + "\n".join(answers) if language == "en" else
+        "Parametri per il rapporto:\n" + "\n".join(params) + "\n\nRisposte:\n" + "\n".join(answers) if language == "it" else
+        "Parameter für den Bericht:\n" + "\n".join(params) + "\n\nAntworten:\n" + "\n".join(answers)
+    )
+
     body = {
         'modelUri': f'gpt://{folder_id}/{gpt_model}',
         'completionOptions': {'stream': False, 'temperature': 1, 'maxTokens': 5000},
@@ -104,20 +123,19 @@ async def show_main_menu(message: Message, state: FSMContext) -> None:
     user_data = await state.get_data()
     language = user_data.get("language", "ru")
 
-    # Main menu buttons
     kb = [
-        [KeyboardButton(text="Написать отчет" if language == "ru" else
-                        "Write a report" if language == "en" else
-                        "Scrivi un rapporto" if language == "it" else
-                        "Bericht schreiben")],
-        [KeyboardButton(text="Поблагодарить разработчика" if language == "ru" else
-                        "Thank the developer" if language == "en" else
-                        "Ringrazia lo sviluppatore" if language == "it" else
-                        "Danke dem Entwickler")],
-        [KeyboardButton(text="Изменить язык" if language == "ru" else
-                        "Change language" if language == "en" else
-                        "Cambia lingua" if language == "it" else
-                        "Sprache ändern")]
+        [KeyboardButton(text="📝 Написать отчет" if language == "ru" else
+                        "📝 Write a report" if language == "en" else
+                        "📝 Scrivi un rapporto" if language == "it" else
+                        "📝 Bericht schreiben")],
+        [KeyboardButton(text="🙏 Поблагодарить разработчика" if language == "ru" else
+                        "🙏 Thank the developer" if language == "en" else
+                        "🙏 Ringrazia lo sviluppatore" if language == "it" else
+                        "🙏 Danke dem Entwickler")],
+        [KeyboardButton(text="🌍 Изменить язык" if language == "ru" else
+                        "🌍 Change language" if language == "en" else
+                        "🌍 Cambia lingua" if language == "it" else
+                        "🌍 Sprache ändern")]
     ]
     keyboard = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
     await message.reply(
@@ -128,7 +146,7 @@ async def show_main_menu(message: Message, state: FSMContext) -> None:
 
 
 @dp.message(lambda message: message.text in [
-    "Написать отчет", "Write a report", "Scrivi un rapporto", "Bericht schreiben"
+    "📝 Написать отчет", "📝 Write a report", "📝 Scrivi un rapporto", "📝 Bericht schreiben"
 ])
 async def start_report(message: Message, state: FSMContext) -> None:
     await state.update_data(current_step=0)
@@ -277,27 +295,27 @@ async def finish_report(message: Message, state: FSMContext) -> None:
 
     report = report_gen(collected_parameters, collected_answers, user_data.get("language", "ru"))
     await message.reply(
-        "Отчет сформирован:\n\n" + report if user_data.get("language") == "ru" else
-        "Report generated:\n\n" + report if user_data.get("language") == "en" else
-        "Rapporto generato:\n\n" + report if user_data.get("language") == "it" else
-        "Bericht erstellt:\n\n" + report)
+        "📄 Отчет сформирован:\n\n" + report if user_data.get("language") == "ru" else
+        "📄 Report generated:\n\n" + report if user_data.get("language") == "en" else
+        "📄 Rapporto generato:\n\n" + report if user_data.get("language") == "it" else
+        "📄 Bericht erstellt:\n\n" + report)
 
     await show_main_menu(message, state)
 
 
 @dp.message(lambda message: message.text in [
-    "Поблагодарить разработчика", "Thank the developer", "Ringrazia lo sviluppatore", "Danke dem Entwickler"
+    "🙏 Поблагодарить разработчика", "🙏 Thank the developer", "🙏 Ringrazia lo sviluppatore", "🙏 Danke dem Entwickler"
 ])
 async def thank_developer(message: Message) -> None:
     await message.reply(
-        "Спасибо!" if message.text == "Поблагодарить разработчика" else
-        "Thank you!" if message.text == "Thank the developer" else
-        "Grazie!" if message.text == "Ringrazia lo sviluppatore" else
-        "Danke!")
+        "Спасибо! 😊" if message.text == "🙏 Поблагодарить разработчика" else
+        "Thank you! 😊" if message.text == "🙏 Thank the developer" else
+        "Grazie! 😊" if message.text == "🙏 Ringrazia lo sviluppatore" else
+        "Danke! 😊")
 
 
 @dp.message(lambda message: message.text in [
-    "Изменить язык", "Change language", "Cambia lingua", "Sprache ändern"
+    "🌍 Изменить язык", "🌍 Change language", "🌍 Cambia lingua", "🌍 Sprache ändern"
 ])
 async def change_language(message: Message, state: FSMContext) -> None:
     kb = [
@@ -327,7 +345,7 @@ async def process_language_change(message: Message, state: FSMContext) -> None:
     selected_language = language_map[message.text]
     await state.update_data(language=selected_language)
     await message.reply(
-        "Язык изменен. / Language changed. / Lingua cambiata. / Sprache geändert.")
+        "✅ Язык изменен. / Language changed. / Lingua cambiata. / Sprache geändert.")
     await show_main_menu(message, state)
 
 
