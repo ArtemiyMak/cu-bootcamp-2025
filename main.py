@@ -7,6 +7,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup, default_state
 from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup
 from dotenv import load_dotenv
+from openai import OpenAI
 import requests
 
 load_dotenv()
@@ -112,9 +113,40 @@ def report_gen(params, answers, language):
     return answer
 
 
+def report_gen_gpt(params, answers, language):
+    base_url = "https://api.aimlapi.com/v1"
+    api_key = "028b03024e454ea1a156d289a7003dce" ##FIX THIS SHIT
+    system_prompt = (
+        "детальный отчет по русски параметры:дата урока,время начала/конца,имя/возраст студента,тема,ДЗ,отзыв ученика,комм. репет." if language == "ru" else
+        "detailed report in English.Use:Lesson date,start/end time,student name/age,topic,homework,feedback,tutor commentif language" == "en" if language == "en" else
+        "un rapporto dettagliato in italiano.Usa:data lezione,ora inizio/fine,nome/età studente,argomento,compiti,feedback,commento tutor" if language == "it" else
+        "Erstelle detaillierten Bericht auf Deutsch.Nutze:Datum, Start / Ende, Name / Alter, Thema, Hausaufgaben, Feedback, Kommentar."
+    )
+
+    user_prompt = (
+        "\n\nОтветы:\n" + "\n".join(answers) if language == "ru" else
+        "\n\nAnswers:\n" + "\n".join(answers) if language == "en" else
+        "\n\nRisposte:\n" + "\n".join(answers) if language == "it" else
+        "\n\nAntworten:\n" + "\n".join(answers)
+    )
+    print(system_prompt)
+    print(user_prompt)
+    api = OpenAI(api_key=api_key, base_url=base_url)
+    completion = api.chat.completions.create(
+        model="mistralai/Mistral-7B-Instruct-v0.2",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        temperature=0.7,
+        max_tokens=256,
+    )
+
+    response = completion.choices[0].message.content
+    return response
+
 @dp.message(Command("start"))
 async def start(message: Message, state: FSMContext) -> None:
-    # Set default language to Russian
     await state.update_data(language="ru")
     await show_main_menu(message, state)
 
@@ -293,7 +325,7 @@ async def finish_report(message: Message, state: FSMContext) -> None:
                                    "Kommentar des Tutors")
         collected_answers.append(user_data["comment"])
 
-    report = report_gen(collected_parameters, collected_answers, user_data.get("language", "ru"))
+    report = report_gen_gpt(collected_parameters, collected_answers, user_data.get("language", "ru"))
     await message.reply(
         "📄 Отчет сформирован:\n\n" + report if user_data.get("language") == "ru" else
         "📄 Report generated:\n\n" + report if user_data.get("language") == "en" else
